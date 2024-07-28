@@ -1,10 +1,16 @@
-# Walkpaper2
-https://extensions.gnome.org/extension/5267/walkpaper2/
+# Walkpaper46
 
 ## About:
 Have a different wallpaper on each GNOME workspace.
 
-Compatibility for GNOME 42 (and beyond?)
+Compatibility for GNOME 46. I make no promises about 45 or >46. 
+
+## Disclaimer:
+I do not know Javascript. I just ported it to match post-45 standards using these guides:
+
+* [Port Extensions to GNOME Shell 45](https://gjs.guide/extensions/upgrading/gnome-shell-45.html)
+* [Extension (ESModule)](https://gjs.guide/extensions/topics/extension.html#classes)
+* [Port “import” into Gnome Shell 45 format](https://discourse.gnome.org/t/port-import-into-gnome-shell-45-format/16769)
 
 ## Installation:
 Compile the extension by running

@@ -1,9 +1,7 @@
-const Gio = imports.gi.Gio;
-const Meta = imports.gi.Meta;
-const Mainloop = imports.mainloop;
-const GLib = imports.gi.GLib;
-
-const ExtensionUtils = imports.misc.extensionUtils;
+import Gio from 'gi://Gio';
+import Meta from 'gi://Meta';
+import GLib from 'gi://GLib';
+import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 const WORKSPACE_COUNT_KEY = 'workspace-count';
 const WORKSPACE_INDEX = 'workspace-index';
@@ -13,7 +11,7 @@ let   CURRENT_WALLPAPER_KEY = 'picture-uri';
 const INTERFACE_SCHEMA = 'org.gnome.desktop.interface';
 const COLOR_SCHEME_KEY = 'color-scheme'
 
-let   _settings;
+let _settings;
 let _changeWallpaperTimeout = null;
 
 function debugLog(s) {
@@ -29,7 +27,6 @@ function _changeWallpaper() {
 		        return GLib.SOURCE_REMOVE;
 		}
 	)
-	//Mainloop.timeout_add(500, _changeWallpaper_delay );
 }
 
 
@@ -98,36 +95,39 @@ let wSwitchedSignalId;
 let wAddedSignalId;
 let wRemovedSignalId;
 
-function enable() {
-    log("Walkpaper enable");
+// the extension class
+export default class MyExtension extends Extension {
+    enable() {
+        log("Walkpaper enable");
 
-    //Initialize globals
-    _settings = ExtensionUtils.getSettings();
+        //Initialize globals
+        _settings = this.getSettings();
 
-    //Initialize settings values
-    _changeIndex();
-    _workspaceNumChanged();
+        //Initialize settings values
+        _changeIndex();
+        _workspaceNumChanged();
 
-    //Connect signals
-    wSwitchedSignalId = global.workspace_manager.connect('workspace-switched', _changeWallpaper);
-    wAddedSignalId = global.workspace_manager.connect('workspace-added', _workspaceNumChanged);
-    wRemovedSignalId = global.workspace_manager.connect('workspace-removed', _workspaceNumChanged);
-}
-
-function disable() {
-    log("Walkpaper disable");
-    
-    if (_changeWallpaperTimeout) {
-        GLib.Source.remove(_changeWallpaperTimeout);
-        _changeWallpaperTimeout = null;
+        //Connect signals
+        wSwitchedSignalId = global.workspace_manager.connect('workspace-switched', _changeWallpaper);
+        wAddedSignalId = global.workspace_manager.connect('workspace-added', _workspaceNumChanged);
+        wRemovedSignalId = global.workspace_manager.connect('workspace-removed', _workspaceNumChanged);
     }
 
-    //Dispose of globals
-    _settings?.run_dispose();
-    _settings = null;
+    disable() {
+        log("Walkpaper disable");
+        
+        if (_changeWallpaperTimeout) {
+            GLib.Source.remove(_changeWallpaperTimeout);
+            _changeWallpaperTimeout = null;
+        }
 
-    //Disconnect signals
-    global.workspace_manager.disconnect(wSwitchedSignalId);
-    global.workspace_manager.disconnect(wAddedSignalId);
-    global.workspace_manager.disconnect(wRemovedSignalId);
+        //Dispose of globals
+        _settings?.run_dispose();
+        _settings = null;
+
+        //Disconnect signals
+        global.workspace_manager.disconnect(wSwitchedSignalId);
+        global.workspace_manager.disconnect(wAddedSignalId);
+        global.workspace_manager.disconnect(wRemovedSignalId);
+    }
 }

@@ -1,15 +1,17 @@
-const Gio = imports.gi.Gio;
-const GLib = imports.gi.GLib;
-const GObject = imports.gi.GObject;
-const Gtk = imports.gi.Gtk;
-const Gdk = imports.gi.Gdk;
-const GdkPixbuf = imports.gi.GdkPixbuf;
+import Gio from 'gi://Gio';
+import Glib from 'gi://GLib';
+import GObject from 'gi://GObject';
+import Gtk from 'gi://Gtk';
+import Gdk from 'gi://Gdk';
+import GdkPixbuf from 'gi://GdkPixbuf';
 
-const Gettext = imports.gettext.domain('walkpaper2@walkpaper.massimiliano-dalcero.github.com');
+import {domain as gettextDomain} from 'gettext';
+const Gettext = gettextDomain('walkpaper2@walkpaper.massimiliano-dalcero.github.com');
+
+import {ExtensionPreferences} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
+
 const _ = Gettext.gettext;
 const N_ = function(e) { return e };
-
-const ExtensionUtils = imports.misc.extensionUtils;
 
 const WORKSPACE_COUNT_KEY = 'workspace-count';
 const WORKSPACE_INDEX = 'workspace-index';
@@ -17,7 +19,6 @@ const WALLPAPERS_KEY = 'workspace-wallpapers';
 let   CURRENT_WALLPAPER_KEY = 'picture-uri';
 const INTERFACE_SCHEMA = 'org.gnome.desktop.interface';
 const COLOR_SCHEME_KEY = 'color-scheme'
-
 
 
 const WalkpaperModel = new GObject.Class({
@@ -36,7 +37,8 @@ const WalkpaperModel = new GObject.Class({
         this.parent(params);
         this.set_column_types([GObject.TYPE_STRING, GObject.TYPE_STRING]);
 
-        this._settings = ExtensionUtils.getSettings();
+        this._object = ExtensionPreferences.lookupByUUID('walkpaper2@walkpaper.massimiliano-dalcero.github.com');
+        this._settings = this._object.getSettings();
 
         let workspaceNum = this._settings.get_int(WORKSPACE_COUNT_KEY);
         for (let i = 0; i < workspaceNum; i++) {
@@ -195,7 +197,8 @@ const WalkpaperSettingsWidget = new GObject.Class({
             if (ok) {
                 _store.set(iter, [_store.Columns.PATH], [filename]);
                 //Check if we changed current wallpaper
-                let _settings = ExtensionUtils.getSettings();
+                let _object = ExtensionPreferences.lookupByUUID('walkpaper2@walkpaper.massimiliano-dalcero.github.com');
+                let _settings = _object.getSettings();
                 let index = _settings.get_int(WORKSPACE_INDEX);
                 if (_store.get_string_from_iter(iter) == '' + index) {
                     //We need to change the wallpaper immediately because workspace change
@@ -240,12 +243,10 @@ const WalkpaperSettingsWidget = new GObject.Class({
     }
 });
 
-function init() {
-    ExtensionUtils.initTranslations();
-}
-
-function buildPrefsWidget() {
-    let widget = new WalkpaperSettingsWidget();
-    widget.show();
-    return widget;
+export default class MyPreferences extends ExtensionPreferences {
+    getPreferencesWidget() {
+        let widget = new WalkpaperSettingsWidget();
+        widget.show();
+        return widget;
+    }
 }
